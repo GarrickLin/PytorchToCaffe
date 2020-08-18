@@ -163,6 +163,16 @@ class Layer_param():
                     upsample_w = size[1] * scale_factor
         self.param.upsample_param.CopyFrom(upsample_param)
 
+    def flatten_param(self, params):
+        flat_params = pb.FlattenParameter()
+        if len(params) >= 1:
+            flat_params.axis = params[0]
+        if len(params) == 2:
+            flat_params.end_axis = params[1]
+        if len(params) > 2:
+            raise Exception("unexcepted number of parameters")
+        self.param.flatten_param.CopyFrom(flat_params)
+        
     def add_data(self,*args):
         """Args are data numpy array
         """

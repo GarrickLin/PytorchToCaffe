@@ -8,6 +8,7 @@ import pytorch_to_caffe
 if __name__=='__main__':
     name='vgg11_bn'
     net=vgg11_bn(True)
+    net.eval()
     input=Variable(torch.ones([1,3,224,224]))
     pytorch_to_caffe.trans_net(net,input,name)
     pytorch_to_caffe.save_prototxt('{}.prototxt'.format(name))

@@ -670,6 +670,20 @@ def _expand_as(input, *args):
     log.cnet.add_layer(layer)
     return x
 
+def _flatten(input, *args):
+    if callable(input):
+        return _flatten(*args)
+    x = raw__flatten__(input, *args)
+    if not NET_INITTED:
+        return x
+    layer_name = log.add_layer(name='flatten')
+    top_blobs = log.add_blobs([x], name='flatten_blob')
+    layer = caffe_net.Layer_param(name=layer_name, type='Flatten',
+                                  bottom=[log.blobs(input)], top=top_blobs)
+    layer.flatten_param(args)
+    log.cnet.add_layer(layer)
+    return x
+
 # 核心组件，通过该类，实现对torch的function中的operators的输入，输出以及参数的读取
 class Rp(object):
     def __init__(self,raw,replace,**kwargs):
@@ -718,6 +732,7 @@ torch.split=Rp(torch.split,_split)
 torch.max=Rp(torch.max,_max)
 torch.cat=Rp(torch.cat,_cat)
 torch.div=Rp(torch.div,_div)
+torch.flatten = Rp(torch.flatten, _flatten)
 
 # TODO: other types of the view function
 try:
@@ -737,6 +752,8 @@ try:
     Variable.__mul__ = _mul
     raw__imul__ = Variable.__imul__
     Variable.__imul__ = _imul
+    raw__flatten__ = Variable.__flatten__
+    Variable.__flatten__ = _flatten
 except:
     # for new version 0.4.0 and later version
     for t in [torch.Tensor]:
@@ -770,6 +787,8 @@ except:
         t.unsqueeze = _unsqueeze
         raw__expand_as__ = t.expand_as
         t.expand_as = _expand_as
+        raw__flatten__ = t.flatten
+        t.flatten = _flatten
 
 
 def trans_net(net,input_var,name='TransferedPytorchModel'):
