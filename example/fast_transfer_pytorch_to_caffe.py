@@ -16,7 +16,7 @@ def transfer_to_caffe():
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")
     transformer = TransformerNet_self_bn().to(device)
-    transformer.load_state_dict(torch.load(args.checkpoint_model))
+    transformer.load_state_dict(torch.load(args.checkpoint_model, map_location=torch.device('cpu')))
     transformer.eval()
     input=Variable(torch.ones([1,3,480,640]))
     pytorch_to_caffe.trans_net(transformer, input,name)
